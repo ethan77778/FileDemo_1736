@@ -1,0 +1,7 @@
+{
+  "directory": "C:\\Users\\user\\Desktop\\apple", // 監控的目錄C:\\Users\\user\\Desktop\\FileDemo_1736\\FileDemo_1736
+  "files_to_watch": [
+    "apple.txt",
+    "banana.txt"
+  ]
+}
