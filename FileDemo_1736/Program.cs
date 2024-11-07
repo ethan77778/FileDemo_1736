@@ -46,9 +46,25 @@
 
             // 監控所有檔案，稍後會根據檔案名稱進行過濾
             // *.*，表示監控所有檔案類型
-            watcher.Filter = "*.*";  
+            watcher.Filter = "*.*";
 
-            // 
+            var SaveOldContents = new Dictionary<string, string>();
+
+            //使用迴圈先提取先前檔案內容 避免因剛開始變數初始化而導致無法記錄先前內容
+            foreach (var file in FilesToMonitor)
+            {
+                string filePath = Path.Combine(CustomDirectoryToWatch, file);
+                //驗證檔案路徑是否正確
+                if (File.Exists(filePath))
+                {
+                    // 讀取最初檔案內容並存入字典
+                    string OriginalFileContents = File.ReadAllText(filePath);
+                    SaveOldContents[filePath] = OriginalFileContents;
+                    Console.WriteLine($"檔案 '{file}' 的初始內容已存入字典。");
+                }
+            }
+
+
             //為 Changed 事件註冊了一個事件處理器。當監控目錄中的檔案發生變動時，這個事件處理器會被觸發
             //sender讓我們能夠知道是哪個 FileSystemWatcher 物件觸發了 Changed 事件
             //ex:當檔案經歷這些 NotifyFilters.FileName | NotifyFilters.LastWrite變動就會觸發sender傳遞給事件處理器
@@ -63,7 +79,8 @@
                 {
                     Console.WriteLine($"檔案變動: {e.FullPath}");
                     // 讀取並打印檔案內容
-                    PrintFileContent(e.FullPath);
+                    //e.FullPath會返還完整路徑
+                    PrintFileContent(e.FullPath, SaveOldContents);
                 }
             };
 
@@ -81,23 +98,64 @@
         }
 
         /// <summary>
-        /// 打印檔案內容
+        /// 讀取檔案內容
         /// </summary>
         /// <param name="filePath"></param>
-        static void PrintFileContent(string filePath)
+          public  static void PrintFileContent(string filePath, Dictionary<string, string> Contents)
+            {
+                try
+                {
+                    // 讀取檔案內容
+                    //讀取路徑中的所有內容
+                    string currentContent = File.ReadAllText(filePath);
+
+                // 確認是否有新增內容
+                //ContainsKey方法為去查看傳進來的字典有無包含KEY與VALUE
+                if (Contents.ContainsKey(filePath))
+                    {   
+                       //把傳進來的字典先前如果有資料先放到OLD裡面
+                        string OldContent = Contents[filePath];
+                        string newContent = GetNewContent(OldContent, currentContent);
+
+                    // 顯示新增的內容
+                    //去檢查新輸入的內容是否為空白 而.IsNullOrEmpty是看是檢查是否為空字串或是NULL
+                    //IsNullOrWhiteSpace 為檢查是否為空字串或NULL或有空白字符
+                    if (!string.IsNullOrWhiteSpace(newContent))
+                        {
+                            Console.WriteLine("新增內容:");
+                            Console.WriteLine(newContent);
+                        }
+                        else
+                        {
+                            Console.WriteLine("沒有新增內容");
+                        }
+                    }
+
+                    // 更新檔案的先前內容
+                    //把路徑跟內容存到字典中
+                 Contents[filePath] = currentContent;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"讀取檔案內容時發生錯誤: {ex.Message}");
+                }                    
+            }
+        /// <summary>
+        /// 顯示檔案內容
+        /// </summary>
+        /// <param name="originalContent"></param>
+        /// <param name="updatedContent"></param>
+        /// <returns></returns>
+        public static string GetNewContent(string originalContent, string updatedContent)
         {
-            try
-            {
-                //File.ReadAllText 方法為從指定的檔案路徑（filePath）讀取整個檔案的內容，並把內容!!存在變數中
-                string content = File.ReadAllText(filePath);
-                Console.WriteLine("變動內容:");
-                Console.WriteLine(content);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"讀取檔案內容時發生錯誤: {ex.Message}");
-            }
+            // 假設新增內容就是從原始內容後面開始的部分
+            int indexOfOriginal = updatedContent.IndexOf(originalContent, StringComparison.Ordinal);
+
+            return indexOfOriginal >= 0
+                ? updatedContent.Substring(indexOfOriginal + originalContent.Length)
+                : string.Empty; // 沒有新增內容
         }
     }
-}
+    }
+//}
 //步驟流程->先查看有無此目錄位置與檔案->設定監控路徑->設定監控觸發條件->建立事件處理器當事件觸發該處理何事
