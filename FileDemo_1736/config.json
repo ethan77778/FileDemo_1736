@@ -1,4 +1,5 @@
 {
+  //這裡是在設定監控位置
   "directory": "C:\\Users\\user\\Desktop\\apple", // 監控的目錄C:\\Users\\user\\Desktop\\FileDemo_1736\\FileDemo_1736
   "files_to_watch": [
     "apple.txt",
