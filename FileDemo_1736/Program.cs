@@ -115,6 +115,7 @@
                 if (LastWriteTimes.ContainsKey(filePath) && LastWriteTimes[filePath] != lastWriteTime)
                 {
                     Console.WriteLine($"檔案 '{file}' 已修改。");
+                    Console.WriteLine($"最後修改時間: {lastWriteTime.ToString("yyyy-MM-dd HH:mm:ss")}");
                     PrintFileContent(filePath);
 
                     // 更新檔案的最後修改時間
@@ -142,6 +143,10 @@
                         Console.WriteLine("沒有新增內容");
                     }
                 }
+                else
+                {
+                    LastWriteContent[filePath] = Currentcontent;
+                }
          
             }
             catch (Exception ex)
@@ -152,6 +157,15 @@
         public string GetNewContent(string OriginalContent,string UpdateContent)
         {
             int IndexofContent=UpdateContent.IndexOf(OriginalContent,StringComparison.Ordinal);
+            if (IndexofContent >= 0)
+            {
+                if ( IndexofContent == 0)
+                {
+                    return UpdateContent.Substring(IndexofContent + OriginalContent.Length);
+                }
+
+            }
+            return string.Empty;
 
         }
     }
