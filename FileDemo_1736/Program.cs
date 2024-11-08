@@ -121,7 +121,7 @@
                 DateTime lastWriteTime = await Task.Run( ()=>File.GetLastWriteTime(filePath));
 
                 // 如果檔案的修改時間有變動，則顯示變更訊息
-                //LastWriteTimes.ContainsKey(filePath)為查看字典檔裡有無此key
+                //LastWriteTimes.ContainsKey(filePath)為查看字典檔裡有無此key(路徑)
                 //接著比對時間有無跟 lastWriteTime 有相同，若不同表示檔案有修改
                 if (LastWriteTimes.ContainsKey(filePath) && LastWriteTimes[filePath] != lastWriteTime)
                 {
@@ -141,18 +141,19 @@
         /// 顯示檔案內容
         /// </summary>
         /// <param name="filePath"></param>
+        // Task 類型的主要方法可以幫助你啟動、等待、取消異步操作，並捕獲錯誤。
         private async Task PrintFileContent(string filePath)
         {
             try
             {  //File.ReadAllText讀取檔案當前內容
-                string Currentcontent = await Task.Run(()=>File.ReadAllText(filePath));
+                string currentcontent = await Task.Run(()=>File.ReadAllText(filePath));
                 //檢查字典檔裡有無相同key
                 if (LastWriteContent.ContainsKey(filePath))
                 {
                     //把上次檔案初始化紀錄的內容放到OldContent中
                     string OldContent =LastWriteContent[filePath];
                     //接著使用GetNewContent去比對新舊內容所以得到的NewContent是比對完的差異結果
-                    string NewContent = GetNewContent(OldContent, Currentcontent);
+                    string NewContent = GetNewContent(OldContent, currentcontent);
                     //IsNullOrWhiteSpace用來檢查字串是否為空或是空白字符或空字串
                     if (!string.IsNullOrWhiteSpace(NewContent))
                     {
@@ -164,21 +165,21 @@
                     }
                 }
                 //再把目前新增的內容存到最後修改內容的變數中
-                LastWriteContent[filePath] = Currentcontent;
+                LastWriteContent[filePath] = currentcontent;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"讀取檔案內容時發生錯誤: {ex.Message}");
             }
         }
-        public string GetNewContent(string OriginalContent,string UpdateContent)
+        public string GetNewContent(string originalContent,string updateContent)
         {
-            int IndexofContent=UpdateContent.IndexOf(OriginalContent,StringComparison.Ordinal);
+            int IndexofContent=updateContent.IndexOf(originalContent,StringComparison.Ordinal);
             if (IndexofContent >= 0)
             {
                 if ( IndexofContent == 0)
                 {
-                    return UpdateContent.Substring(IndexofContent + OriginalContent.Length);
+                    return updateContent.Substring(IndexofContent + originalContent.Length);
                 }
 
             }
