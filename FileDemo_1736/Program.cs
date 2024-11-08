@@ -34,6 +34,7 @@
             program.StartMonitoring();
 
             Console.WriteLine("按任意鍵停止監控...");
+            //為按下任意鍵後停止監測
             Console.ReadKey();
 
             // 停止計時器
@@ -49,10 +50,11 @@
             // 初始化檔案資料
             InitializeFiles();
 
-            // 設置計時器，每 5 秒檢查一次檔案變化
-            //TimeSpan.Zero為延遲時間
+            // 創建並啟動定時器
+            //TimeSpan.Zero為延遲時間(立即觸發)
             //TimeSpan.FromSeconds(5)間隔時間
-            timer = new Timer(CheckFileChanges, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
+            //每隔五秒觸發CheckFileChanges方法檢查檔案變更
+            timer = new Timer(CheckFileChanges, null, TimeSpan.Zero, TimeSpan.FromSeconds(20));
 
             Console.WriteLine($"開始監控目錄: {CustomDirectoryToWatch}");
         }
@@ -70,15 +72,18 @@
         /// <summary>
         /// 檢查資料夾檔案是否存在
         /// </summary>
+        //剛開始在建立環境時先記錄過一次初始內容
         private void InitializeFiles()
         {
             foreach (var file in FilesToMonitor)
             {
+                //結合路徑
                 string filePath = Path.Combine(CustomDirectoryToWatch, file);
 
-                // 確保資料夾存在
+                // Directory.Exists為檢查路徑是否存在，如果存在回傳true
                 if (!Directory.Exists(CustomDirectoryToWatch))
                 {
+                    //創建一個新的資料夾
                     Directory.CreateDirectory(CustomDirectoryToWatch);
                     Console.WriteLine($"資料夾 '{CustomDirectoryToWatch}' 已創建。");
                 }
@@ -86,11 +91,12 @@
                 // 確保檔案存在，若不存在則創建
                 if (!File.Exists(filePath))
                 {
+                    //這個方法File.WriteAllText是將指定內容寫到檔案中
                     File.WriteAllText(filePath, $"這是 {file} 的初始內容。");
                     Console.WriteLine($"檔案 '{file}' 已創建並放置在資料夾 '{CustomDirectoryToWatch}' 中。");
                 }
 
-                // 記錄檔案的最後修改時間
+                // 將檔案的最後修改時間存到LastWriteTimes與內容存到LastWriteContent
                 //GetLastWriteTime可以獲取檔案最後修改時間
                 LastWriteTimes[filePath] = File.GetLastWriteTime(filePath);
                 LastWriteContent[filePath]=File.ReadAllText(filePath);
@@ -102,21 +108,24 @@
         /// 檢查檔案是否有變更的方法
         /// </summary>
         /// <param name="state"></param>
-        private void CheckFileChanges(object state)
+        private async void CheckFileChanges(object state)
         {
+
             foreach (var file in FilesToMonitor)
             {
                 string filePath = Path.Combine(CustomDirectoryToWatch, file);
 
-               
-                DateTime lastWriteTime = File.GetLastWriteTime(filePath);
+               //取得檔案最後修改時間
+                DateTime lastWriteTime = await Task.Run( ()=>File.GetLastWriteTime(filePath));
 
                 // 如果檔案的修改時間有變動，則顯示變更訊息
+                //LastWriteTimes.ContainsKey(filePath)為查看字典檔裡有無此key
+                //接著比對時間有無跟 lastWriteTime 有相同，若不同表示檔案有修改
                 if (LastWriteTimes.ContainsKey(filePath) && LastWriteTimes[filePath] != lastWriteTime)
                 {
                     Console.WriteLine($"檔案 '{file}' 已修改。");
                     Console.WriteLine($"最後修改時間: {lastWriteTime.ToString("yyyy-MM-dd HH:mm:ss")}");
-                    PrintFileContent(filePath);
+                    await PrintFileContent(filePath);
 
                     // 更新檔案的最後修改時間
                     LastWriteTimes[filePath] = lastWriteTime;
@@ -126,15 +135,23 @@
         }
 
         // 顯示檔案內容的功能
-        private void PrintFileContent(string filePath)
+        /// <summary>
+        /// 顯示檔案內容
+        /// </summary>
+        /// <param name="filePath"></param>
+        private async Task PrintFileContent(string filePath)
         {
             try
-            {
-                string Currentcontent = File.ReadAllText(filePath);
+            {  //File.ReadAllText讀取檔案當前內容
+                string Currentcontent = await Task.Run(()=>File.ReadAllText(filePath));
+                //檢查字典檔裡有無相同key
                 if (LastWriteContent.ContainsKey(filePath))
                 {
-                    string OldContent=LastWriteContent[filePath];
+                    //把上次檔案初始化紀錄的內容放到OldContent中
+                    string OldContent =LastWriteContent[filePath];
+                    //接著使用GetNewContent去比對新舊內容所以得到的NewContent是比對完的差異結果
                     string NewContent = GetNewContent(OldContent, Currentcontent);
+                    //IsNullOrWhiteSpace用來檢查字串是否為空或是空白字符或空字串
                     if (!string.IsNullOrWhiteSpace(NewContent))
                     {
                         Console.WriteLine($"新增內容:{NewContent}");
@@ -144,6 +161,7 @@
                         Console.WriteLine("沒有新增內容");
                     }
                 }
+                //再把目前新增的內容存到最後修改內容的變數中
                 LastWriteContent[filePath] = Currentcontent;
             }
             catch (Exception ex)
@@ -162,6 +180,7 @@
                 }
 
             }
+            //返回一個空字串
             return string.Empty;
 
         }
