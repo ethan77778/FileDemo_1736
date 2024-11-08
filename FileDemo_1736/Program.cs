@@ -115,7 +115,9 @@
             {
                 string filePath = Path.Combine(CustomDirectoryToWatch, file);
 
-               //取得檔案最後修改時間
+                //取得檔案最後修改時間
+                //File.GetLastWriteTime為同步方法會娶的最後修改時間，並返還一個datetime
+                //使用Task.Run啟動一個新的背景工作執行緒或任務，並異步執行可提高效能
                 DateTime lastWriteTime = await Task.Run( ()=>File.GetLastWriteTime(filePath));
 
                 // 如果檔案的修改時間有變動，則顯示變更訊息
