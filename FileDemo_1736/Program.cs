@@ -101,45 +101,44 @@
         /// 讀取檔案內容
         /// </summary>
         /// <param name="filePath"></param>
-          public  static void PrintFileContent(string filePath, Dictionary<string, string> Contents)
+        public static void PrintFileContent(string filePath, Dictionary<string, string> Contents)
+        {
+            try
             {
-                try
-                {
-                    // 讀取檔案內容
-                    //讀取路徑中的所有內容
-                    string currentContent = File.ReadAllText(filePath);
+                // 讀取檔案內容
+                //讀取路徑中的所有內容
+                string currentContent = File.ReadAllText(filePath);
 
                 // 確認是否有新增內容
                 //ContainsKey方法為去查看傳進來的字典有無包含KEY與VALUE
                 if (Contents.ContainsKey(filePath))
-                    {   
-                       //把傳進來的字典先前如果有資料先放到OLD裡面
-                        string OldContent = Contents[filePath];
-                        string newContent = GetNewContent(OldContent, currentContent);
+                {
+                    //把傳進來的字典先前如果有資料先放到OLD裡面
+                    string OldContent = Contents[filePath];
+                    string newContent = GetNewContent(OldContent, currentContent);
 
                     // 顯示新增的內容
                     //去檢查新輸入的內容是否為空白 而.IsNullOrEmpty是看是檢查是否為空字串或是NULL
                     //IsNullOrWhiteSpace 為檢查是否為空字串或NULL或有空白字符
                     if (!string.IsNullOrWhiteSpace(newContent))
-                        {
-                            Console.WriteLine("新增內容:");
-                            Console.WriteLine(newContent);
-                        }
-                        else
-                        {
-                            Console.WriteLine("沒有新增內容");
-                        }
+                    {
+                        Console.WriteLine($"新增內容:{newContent}");
                     }
-
-                    // 更新檔案的先前內容
-                    //把路徑跟內容存到字典中
-                 Contents[filePath] = currentContent;
+                    else
+                    {
+                        Console.WriteLine("沒有新增內容");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"讀取檔案內容時發生錯誤: {ex.Message}");
-                }                    
+
+                // 更新檔案的先前內容
+                //把路徑跟內容存到字典中
+                Contents[filePath] = currentContent;
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"讀取檔案內容時發生錯誤: {ex.Message}");
+            }
+        }
         /// <summary>
         /// 顯示檔案內容
         /// </summary>
@@ -149,13 +148,25 @@
         public static string GetNewContent(string originalContent, string updatedContent)
         {
             // 假設新增內容就是從原始內容後面開始的部分
+            //indexof方法作用是用來比對兩個字串中完全相符的並返回開始位置的索引值（整數）
+            //ex:"Hello, World!"與"World" 加入indexof方法後，會去比對符合的部分從w開始索引為7所以會返還7
+            //StringComparison.Ordinal為區分大小寫
             int indexOfOriginal = updatedContent.IndexOf(originalContent, StringComparison.Ordinal);
 
-            return indexOfOriginal >= 0
-                ? updatedContent.Substring(indexOfOriginal + originalContent.Length)
-                : string.Empty; // 沒有新增內容
+            //如果大於等於0代表有找到符合的字串並從第幾個索引開始
+            //indexOfOriginal == 0就是代表新增的內容是在舊內容之後
+            //所以就使用substring擷取舊字串長度後的內容即可
+            if (indexOfOriginal >= 0)
+            {
+                if (indexOfOriginal == 0)
+                {
+                    return updatedContent.Substring(indexOfOriginal + originalContent.Length);
+                }
+
+            }
+            return string.Empty;
         }
     }
-    }
+}
 //}
 //步驟流程->先查看有無此目錄位置與檔案->設定監控路徑->設定監控觸發條件->建立事件處理器當事件觸發該處理何事
