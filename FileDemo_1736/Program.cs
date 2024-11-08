@@ -3,11 +3,26 @@
     internal class Program
     {
         // 設定要監控的資料夾路徑和檔案列表
+        /// <summary>
+        /// 檔案位置
+        /// </summary>
         public string CustomDirectoryToWatch = @"C:\Users\user\Desktop\apple";
+        /// <summary>
+        /// 檔案名稱
+        /// </summary>
         public string[] FilesToMonitor = { "apple.txt", "banana.txt" };
 
-        // 儲存檔案的最後修改時間
+        // 此變數用來儲存檔案的最後修改時間
+        /// <summary>
+        /// 檔案的最後修改時間
+        /// </summary>
         public Dictionary<string, DateTime> LastWriteTimes = new Dictionary<string, DateTime>();
+
+        //此變數用來儲存檔案內容
+        /// <summary>
+        /// 最後內容
+        /// </summary>
+        public Dictionary<string,string>LastWriteContent= new Dictionary<string,string>();
 
         // 靜態計時器變數
         public Timer timer;
@@ -26,6 +41,9 @@
         }
 
         // 初始化檔案並設置監控
+        /// <summary>
+        /// 設定監控時間
+        /// </summary>
         public void StartMonitoring()
         {
             // 初始化檔案資料
@@ -40,6 +58,9 @@
         }
 
         // 停止計時器
+       /// <summary>
+       /// 停止監控
+       /// </summary>
         public void StopMonitoring()
         {
             //會安全地停止定時器並釋放資源
@@ -72,6 +93,7 @@
                 // 記錄檔案的最後修改時間
                 //GetLastWriteTime可以獲取檔案最後修改時間
                 LastWriteTimes[filePath] = File.GetLastWriteTime(filePath);
+                LastWriteContent[filePath]=File.ReadAllText(filePath);
             }
         }
 
@@ -106,8 +128,13 @@
         {
             try
             {
-                string content = File.ReadAllText(filePath);
-                Console.WriteLine($"檔案內容：\n{content}");
+                string Currentcontent = File.ReadAllText(filePath);
+                if (LastWriteContent.ContainsKey(filePath))
+                {
+                    string OldContent=LastWriteContent[filePath];
+                    string NewContent = GetNewContent(OldContent, Currentcontent);
+                }
+         
             }
             catch (Exception ex)
             {
