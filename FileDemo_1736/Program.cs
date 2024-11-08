@@ -121,6 +121,7 @@
                     // 更新檔案的最後修改時間
                     LastWriteTimes[filePath] = lastWriteTime;
                 }
+            
             }
         }
 
@@ -143,11 +144,7 @@
                         Console.WriteLine("沒有新增內容");
                     }
                 }
-                else
-                {
-                    LastWriteContent[filePath] = Currentcontent;
-                }
-         
+                LastWriteContent[filePath] = Currentcontent;
             }
             catch (Exception ex)
             {
