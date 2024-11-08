@@ -133,6 +133,14 @@
                 {
                     string OldContent=LastWriteContent[filePath];
                     string NewContent = GetNewContent(OldContent, Currentcontent);
+                    if (!string.IsNullOrWhiteSpace(NewContent))
+                    {
+                        Console.WriteLine($"新增內容:{NewContent}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("沒有新增內容");
+                    }
                 }
          
             }
@@ -140,6 +148,11 @@
             {
                 Console.WriteLine($"讀取檔案內容時發生錯誤: {ex.Message}");
             }
+        }
+        public string GetNewContent(string OriginalContent,string UpdateContent)
+        {
+            int IndexofContent=UpdateContent.IndexOf(OriginalContent,StringComparison.Ordinal);
+
         }
     }
 }
