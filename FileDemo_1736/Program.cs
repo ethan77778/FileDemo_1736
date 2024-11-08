@@ -11,33 +11,33 @@
 
             // 設定要監控的目錄和檔案的自定義路徑
             // 設定要監控的資料夾路徑
-            string CustomDirectoryToWatch = @"C:\Users\user\Desktop\apple"; // 目標資料夾
-            string[] FilesToMonitor = { "apple.txt", "banana.txt" };
+            string customDirectoryToWatch = @"C:\Users\user\Desktop\apple"; // 目標資料夾
+            string[] filesToMonitor = { "apple.txt", "banana.txt" };
 
             // 確保資料夾存在，若不存在則創建
             //Directory.Exists這方法為驗證資料夾是否位置相符
-            if (!Directory.Exists(CustomDirectoryToWatch))
+            if (!Directory.Exists(customDirectoryToWatch))
             {
-                Directory.CreateDirectory(CustomDirectoryToWatch); // 創建資料夾
-                Console.WriteLine($"資料夾 '{CustomDirectoryToWatch}' 已創建。");
+                Directory.CreateDirectory(customDirectoryToWatch); // 創建資料夾
+                Console.WriteLine($"資料夾 '{customDirectoryToWatch}' 已創建。");
             }
 
             // 創建檔案並將其放入該資料夾
-            foreach (var file in FilesToMonitor)
+            foreach (var file in filesToMonitor)
             {
                 //Path.Combine會自動合併兩個路徑 並自動加入\(反斜線)若有多餘則會自動刪除
-                string filePath = Path.Combine(CustomDirectoryToWatch, file); // 路徑結合檔案名稱
+                string filePath = Path.Combine(customDirectoryToWatch, file); // 路徑結合檔案名稱
 
                 if (!File.Exists(filePath))  // 檢查檔案是否已存在
                 {
                     // 創建檔案並寫入初始內容
                     File.WriteAllText(filePath, $"這是 {file} 的初始內容。");
-                    Console.WriteLine($"檔案 '{file}' 已創建並放置在資料夾 '{CustomDirectoryToWatch}' 中。");
+                    Console.WriteLine($"檔案 '{file}' 已創建並放置在資料夾 '{customDirectoryToWatch}' 中。");
                 }
             }
             // 使用 FileSystemWatcher 來監控檔案變動
             //FileSystemWatcher是用來監測檔案系統變化的類別
-            FileSystemWatcher watcher = new FileSystemWatcher(CustomDirectoryToWatch);
+            FileSystemWatcher watcher = new FileSystemWatcher(customDirectoryToWatch);
 
             // 設定監控過濾條件
             //NotifyFilters.FileName當檔案名稱發生變化事件會被觸發
@@ -48,18 +48,18 @@
             // *.*，表示監控所有檔案類型
             watcher.Filter = "*.*";
 
-            var SaveOldContents = new Dictionary<string, string>();
+            var saveOldContents = new Dictionary<string, string>();
 
             //使用迴圈先提取先前檔案內容 避免因剛開始變數初始化而導致無法記錄先前內容
-            foreach (var file in FilesToMonitor)
+            foreach (var file in filesToMonitor)
             {
-                string filePath = Path.Combine(CustomDirectoryToWatch, file);
+                string filePath = Path.Combine(customDirectoryToWatch, file);
                 //驗證檔案路徑是否正確
                 if (File.Exists(filePath))
                 {
                     // 讀取最初檔案內容並存入字典
-                    string OriginalFileContents = File.ReadAllText(filePath);
-                    SaveOldContents[filePath] = OriginalFileContents;
+                    string originalFileContents = File.ReadAllText(filePath);
+                    saveOldContents[filePath] = originalFileContents;
                     Console.WriteLine($"檔案 '{file}' 的初始內容已存入字典。");
                 }
             }
@@ -77,19 +77,19 @@
                 //StringComparison.OrdinalIgnoreCase忽略大小寫的意思
                 //Path.GetFileName它的作用是從完整的檔案路徑中提取檔案名稱
                 //當觸發條件時會先檢查是否為要監測的檔案
-                if (Array.Exists(FilesToMonitor, f => f.Equals(Path.GetFileName(e.FullPath), StringComparison.OrdinalIgnoreCase)))
+                if (Array.Exists(filesToMonitor, f => f.Equals(Path.GetFileName(e.FullPath), StringComparison.OrdinalIgnoreCase)))
                 {
                     Console.WriteLine($"檔案變動: {e.FullPath}");
                     // 讀取並打印檔案內容
                     //e.FullPath會返還完整路徑
-                    PrintFileContent(e.FullPath, SaveOldContents);
+                    PrintFileContent(e.FullPath, saveOldContents);
                 }
             };
 
             // 會啟用檔案系統變更的監控
             watcher.EnableRaisingEvents = true;
 
-            Console.WriteLine($"開始監控目錄: {CustomDirectoryToWatch}");
+            Console.WriteLine($"開始監控目錄: {customDirectoryToWatch}");
 
             // 防止程式結束，直到使用者按下任意鍵
             Console.WriteLine("按任意鍵停止監控...");
@@ -103,7 +103,7 @@
         /// 讀取檔案內容
         /// </summary>
         /// <param name="filePath"></param>
-        public static void PrintFileContent(string filePath, Dictionary<string, string> Contents)
+        public static void PrintFileContent(string filePath, Dictionary<string, string> conTents)
         {
             try
             {
@@ -113,10 +113,10 @@
 
                 // 確認是否有新增內容
                 //ContainsKey方法為去查看傳進來的字典有無包含KEY與VALUE
-                if (Contents.ContainsKey(filePath))
+                if (conTents.ContainsKey(filePath))
                 {
                     //把傳進來的字典先前如果有資料先放到OLD裡面
-                    string OldContent = Contents[filePath];
+                    string OldContent = conTents[filePath];
                     string newContent = GetNewContent(OldContent, currentContent);
 
                     // 顯示新增的內容
@@ -134,7 +134,7 @@
 
                 // 更新檔案的先前內容
                 //把路徑跟內容存到字典中
-                Contents[filePath] = currentContent;
+                conTents[filePath] = currentContent;
             }
             catch (Exception ex)
             {
