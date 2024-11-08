@@ -75,6 +75,8 @@
                 //Array.Exists是一個陣列方法她會檢查陣列中是否有符合的條件的元素，並返回true或false
                 //Equals這方法用來檢查兩個字串是否相等(檢查陣列中檔案名稱與檔案名稱)
                 //StringComparison.OrdinalIgnoreCase忽略大小寫的意思
+                //Path.GetFileName它的作用是從完整的檔案路徑中提取檔案名稱
+                //當觸發條件時會先檢查是否為要監測的檔案
                 if (Array.Exists(FilesToMonitor, f => f.Equals(Path.GetFileName(e.FullPath), StringComparison.OrdinalIgnoreCase)))
                 {
                     Console.WriteLine($"檔案變動: {e.FullPath}");
@@ -84,7 +86,7 @@
                 }
             };
 
-            // 開始監控
+            // 會啟用檔案系統變更的監控
             watcher.EnableRaisingEvents = true;
 
             Console.WriteLine($"開始監控目錄: {CustomDirectoryToWatch}");
