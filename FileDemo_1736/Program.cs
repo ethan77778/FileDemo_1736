@@ -108,7 +108,7 @@
             {
                 string filePath = Path.Combine(CustomDirectoryToWatch, file);
 
-                // 檢查檔案的修改時間
+               
                 DateTime lastWriteTime = File.GetLastWriteTime(filePath);
 
                 // 如果檔案的修改時間有變動，則顯示變更訊息
