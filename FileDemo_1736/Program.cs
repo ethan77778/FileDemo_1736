@@ -18,7 +18,7 @@
         /// </summary>
         public Dictionary<string, DateTime> LastWriteTimes = new Dictionary<string, DateTime>();
 
-        //此變數用來儲存檔案內容
+        //此變數用來儲存檔案最後修改內容
         /// <summary>
         /// 最後內容
         /// </summary>
@@ -29,7 +29,7 @@
 
         static void Main(string[] args)
         {
-            // 創建 Program 類的實例Program 類的主要目的是進行檔案監控
+         
             var program = new Program();
             program.StartMonitoring();
 
@@ -51,8 +51,9 @@
             InitializeFiles();
 
             // 創建並啟動定時器
+            //(第二個參數)null 就是看有沒有要傳遞甚麼資訊給 回調方法中(第一個參數)
             //TimeSpan.Zero為延遲時間(立即觸發)
-            //TimeSpan.FromSeconds(5)間隔時間
+            //TimeSpan.FromSeconds(5)間隔時間;定時器每次觸發回調方法之間的時間間隔
             //每隔五秒觸發CheckFileChanges方法檢查檔案變更
             timer = new Timer(CheckFileChanges, null, TimeSpan.Zero, TimeSpan.FromSeconds(20));
 
@@ -172,6 +173,12 @@
                 Console.WriteLine($"讀取檔案內容時發生錯誤: {ex.Message}");
             }
         }
+        /// <summary>
+        /// 取得新內容
+        /// </summary>
+        /// <param name="originalContent"></param>
+        /// <param name="updateContent"></param>
+        /// <returns></returns>
         public string GetNewContent(string originalContent,string updateContent)
         {
             int IndexofContent=updateContent.IndexOf(originalContent,StringComparison.Ordinal);
