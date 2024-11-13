@@ -48,17 +48,19 @@
             // *.*，表示監控所有檔案類型
             watcher.Filter = "*.*";
 
-            var saveOldContents = new Dictionary<string, string>();
+           var saveOldContents = new Dictionary<string, string>();
+           
 
-            //使用迴圈先提取先前檔案內容 避免因剛開始變數初始化而導致無法記錄先前內容
+            //使用迴圈檢查檔案路徑與提取先前檔案內容 
             foreach (var file in filesToMonitor)
             {
                 string filePath = Path.Combine(customDirectoryToWatch, file);
                 //驗證檔案路徑是否正確
                 if (File.Exists(filePath))
                 {
-                    // 讀取最初檔案內容並存入字典
+                    // ReadAllText()方法為讀取整個文本文件的內容; 讀取最初檔案內容並存入字典
                     string originalFileContents = File.ReadAllText(filePath);
+                    //把之前內容存入  saveOldContents中
                     saveOldContents[filePath] = originalFileContents;
                     Console.WriteLine($"檔案 '{file}' 的初始內容已存入字典。");
                 }
@@ -73,7 +75,7 @@
             {
                 // 檢查檔案是否是我們要監控的檔案
                 //Array.Exists是一個陣列方法她會檢查陣列中是否有符合的條件的元素，並返回true或false
-                //Equals這方法用來檢查兩個字串是否相等(檢查陣列中檔案名稱與檔案名稱)
+                //Equals這方法用來檢查兩個字串是否相等(檢查陣列中檔案名稱與檔案中的檔案名稱)
                 //StringComparison.OrdinalIgnoreCase忽略大小寫的意思
                 //Path.GetFileName它的作用是從完整的檔案路徑中提取檔案名稱
                 //當觸發條件時會先檢查是否為要監測的檔案
@@ -87,6 +89,7 @@
             };
 
             // 會啟用檔案系統變更的監控
+            //開始監控檔案或目錄變化，並且開始觸發相關的事件
             watcher.EnableRaisingEvents = true;
 
             Console.WriteLine($"開始監控目錄: {customDirectoryToWatch}");
@@ -100,7 +103,7 @@
         }
 
         /// <summary>
-        /// 讀取檔案內容
+        /// 讀取顯示檔案內容
         /// </summary>
         /// <param name="filePath"></param>
         public static void PrintFileContent(string filePath, Dictionary<string, string> conTents)
@@ -131,7 +134,6 @@
                         Console.WriteLine("沒有新增內容");
                     }
                 }
-
                 // 更新檔案的先前內容
                 //把路徑跟內容存到字典中
                 conTents[filePath] = currentContent;
@@ -142,16 +144,16 @@
             }
         }
         /// <summary>
-        /// 顯示檔案內容
+        /// 取得新內容
         /// </summary>
         /// <param name="originalContent"></param>
         /// <param name="updatedContent"></param>
         /// <returns></returns>
         public static string GetNewContent(string originalContent, string updatedContent)
         {
-            // 假設新增內容就是從原始內容後面開始的部分
-            //indexof方法作用是用來比對兩個字串中完全相符的並返回開始位置的索引值（整數）
-            //ex:"Hello, World!"與"World" 加入indexof方法後，會去比對符合的部分從w開始索引為7所以會返還7
+            // 假設新增內容就是從原始內容後面開始的部分，用來查找 originalContent 在 updatedContent 中首次出現的位置。
+            //indexof方法是用來比對兩個字串中完全相符的並返回開始位置的索引值（整數），而且會逐一比對字串
+            //ex:"Hello"與"Hello, World!" 加入indexof方法後，會去比對符合的部分從W開始索引為0所以會返還0
             //StringComparison.Ordinal為區分大小寫
             int indexOfOriginal = updatedContent.IndexOf(originalContent, StringComparison.Ordinal);
 
